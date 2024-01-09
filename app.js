@@ -357,7 +357,7 @@ async function sendToDialogFlow(sender, textString, params) {
     sendTypingOn(sender);
 
     try {
-        const sessionPath = sessionClient.sessionPath(
+        const sessionPath = sessionClient.projectAgentSessionPath(
             config.GOOGLE_PROJECT_ID,
             sessionIds.get(sender)
         );
