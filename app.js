@@ -223,11 +223,14 @@ function handleDialogFlowAction(sender, action, messages, contexts, parameters) 
 
                     sendEmail("New job application", emailContent);
                 }   
-                handleMessages(messages, sender);
-
             }
+
+            console.log("1", action);
+            handleMessages(messages, sender);
+            break;
         default:
             //unhandled action, just send back the text
+            console.log("2", action);
             handleMessages(messages, sender);
     }
 }
@@ -362,8 +365,6 @@ async function sendToDialogFlow(sender, textString, params) {
             sessionIds.get(sender)
         );
 
-        console.log(sessionPath)
-
         const request = {
             session: sessionPath,
             queryInput: {
@@ -378,12 +379,7 @@ async function sendToDialogFlow(sender, textString, params) {
                 }
             }
         };
-
-        console.log(request)
-
         const responses = await sessionClient.detectIntent(request);
-
-        console.log(responses)
 
         const result = responses[0].queryResult;
         handleDialogFlowResponse(sender, result);
