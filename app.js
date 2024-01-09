@@ -1,13 +1,12 @@
 'use strict';
 
-const dialogflow = require('dialogflow');
+const dialogflow = require('@google-cloud/dialogflow');
 const config = require('./config');
 const express = require('express');
 const crypto = require('crypto');
-const bodyParser = require('body-parser');
-const request = require('request');
 const app = express();
 const uuid = require('uuid');
+const axios = require("axios");
 
 
 // Messenger API parameters
@@ -40,26 +39,17 @@ if (!config.SERVER_URL) { //used for ink to static files
 
 app.set('port', (process.env.PORT || 5000))
 
-//verify request came from facebook
-app.use(bodyParser.json({
-    verify: verifyRequestSignature
-}));
+// Verify request came from Facebook
+app.use(express.json({ verify: verifyRequestSignature }));
 
-//serve static files in the public directory
+// Serve static files in the public directory
 app.use(express.static('public'));
 
 // Process application/x-www-form-urlencoded
-app.use(bodyParser.urlencoded({
-    extended: false
-}));
+app.use(express.urlencoded({ extended: false }));
 
 // Process application/json
-app.use(bodyParser.json());
-
-
-
-
-
+app.use(express.json());
 
 const credentials = {
     client_email: config.GOOGLE_CLIENT_EMAIL,
@@ -72,7 +62,6 @@ const sessionClient = new dialogflow.SessionsClient(
         credentials
     }
 );
-
 
 const sessionIds = new Map();
 
@@ -101,9 +90,7 @@ app.get('/webhook/', function (req, res) {
  */
 app.post('/webhook/', function (req, res) {
     var data = req.body;
-    console.log(JSON.stringify(data));
-
-
+    console.log(data);
 
     // Make sure this is a page subscription
     if (data.object == 'page') {
@@ -609,7 +596,6 @@ function sendReadReceipt(recipientId) {
  */
 function sendTypingOn(recipientId) {
 
-
     var messageData = {
         recipient: {
             id: recipientId
@@ -670,18 +656,12 @@ function sendAccountLinking(recipientId) {
  *
  */
 function callSendAPI(messageData) {
-    request({
-        uri: 'https://graph.facebook.com/v3.2/me/messages',
-        qs: {
-            access_token: config.FB_PAGE_TOKEN
-        },
-        method: 'POST',
-        json: messageData
 
-    }, function (error, response, body) {
-        if (!error && response.statusCode == 200) {
-            var recipientId = body.recipient_id;
-            var messageId = body.message_id;
+    axios.post('https://graph.facebook.com/v3.2/me/messages', messageData)
+    .then(response => {
+        if(response.status === 200){
+            var recipientId = response.data.recipientId;
+            var messageId =  response.data.messageId
 
             if (messageId) {
                 console.log("Successfully sent message with id %s to recipient %s",
@@ -690,10 +670,10 @@ function callSendAPI(messageData) {
                 console.log("Successfully called Send API for recipient %s",
                     recipientId);
             }
-        } else {
-            console.error("Failed calling Send API", response.statusCode, response.statusMessage, body.error);
         }
-    });
+    })
+    .catch(err => console.error("Failed calling Send API", err));
+
 }
 
 
