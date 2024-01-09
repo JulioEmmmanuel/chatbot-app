@@ -716,7 +716,9 @@ function sendEmail(title, message){
  */
 function callSendAPI(messageData) {
 
-    axios.post('https://graph.facebook.com/v3.2/me/messages', messageData)
+    axios.post('https://graph.facebook.com/v3.2/me/messages', messageData, {
+        access_token: config.FB_PAGE_TOKEN
+    })
     .then(response => {
         if(response.status === 200){
             var recipientId = response.data.recipientId;
