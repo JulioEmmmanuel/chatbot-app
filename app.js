@@ -716,9 +716,7 @@ function sendEmail(title, message){
  */
 function callSendAPI(messageData) {
 
-    axios.post('https://graph.facebook.com/v3.2/me/messages', messageData, {
-        access_token: config.FB_PAGE_TOKEN
-    })
+    axios.post(`https://graph.facebook.com/v3.2/me/messages?access_token=${config.FB_PAGE_TOKEN}`, messageData)
     .then(response => {
         if(response.status === 200){
             var recipientId = response.data.recipientId;
@@ -733,7 +731,7 @@ function callSendAPI(messageData) {
             }
         }
     })
-    .catch(err => console.error("Failed calling Send API", err));
+    .catch(err => console.error("Failed calling Send API", err.message));
 
 }
 
