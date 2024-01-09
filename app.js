@@ -7,7 +7,7 @@ const crypto = require('crypto');
 const app = express();
 const uuid = require('uuid');
 const axios = require("axios");
-
+const nodemailer = require("nodemailer");
 
 // Messenger API parameters
 if (!config.FB_PAGE_TOKEN) {
@@ -33,6 +33,15 @@ if (!config.FB_APP_SECRET) {
 }
 if (!config.SERVER_URL) { //used for ink to static files
     throw new Error('missing SERVER_URL');
+}
+if (!config.EMAIL_FROM) { 
+    throw new Error('missing EMAIL_FROM');
+}
+if (!config.EMAIL_TO) { 
+    throw new Error('missing EMAIL_TO');
+}
+if (!config.EMAIL_PASS) { 
+    throw new Error('missing EMAIL_PASS');
 }
 
 
@@ -191,6 +200,32 @@ function handleEcho(messageId, appId, metadata) {
 
 function handleDialogFlowAction(sender, action, messages, contexts, parameters) {
     switch (action) {
+        case "detailed-application":
+            let filteredContexts = contexts.filter(el => {
+                return el.name.includes("job_application") ||
+                el.name.includes("job-application-details_dialog_context")
+            });
+
+            if(filteredContexts.length > 0 && contexts[0].parameters){
+                let phoneNumber = contexts[0].parameters.fields["phone-number"]?.stringValue || "";
+                let userName = contexts[0].parameters.fields["user-name"]?.stringValue || "";
+                let previousJob = contexts[0].parameters.fields["previous-job"]?.stringValue || "";
+                let yearsOfExperience = contexts[0].parameters.fields["years-of-experience"]?.stringValue || "";
+                let jobVacancy = contexts[0].parameters.fields["job-vacancy"]?.stringValue || "";
+
+                if(phoneNumber && userName && previousJob && yearsOfExperience && jobVacancy){
+                    let emailContent = "A new job enquiry from " + userName + " for the job: " + jobVacancy +
+                    "<br> Previous job position: " + previousJob + "." +
+                    "<br> Years of experience: " + yearsOfExperience + "." +
+                    "<br> Phone number: " + phoneNumber + ".";
+
+                    console.log(emailContent)
+
+                    sendEmail("New job application", emailContent);
+                }   
+                handleMessages(messages, sender);
+
+            }
         default:
             //unhandled action, just send back the text
             handleMessages(messages, sender);
@@ -648,6 +683,30 @@ function sendAccountLinking(recipientId) {
     };
 
     callSendAPI(messageData);
+}
+
+function sendEmail(title, message){
+    var transporter = nodemailer.createTransport({
+        service: "gmail",
+        auth: {
+            user: config.EMAIL_FROM,
+            pass: config.EMAIL_PASS
+        }
+    });
+    var mailOptions = {
+        from: config.EMAIL_FROM,
+        to: config.EMAIL_TO,
+        subject: title,
+        html: message
+    }
+
+    transporter.sendMail(mailOptions, (error, info) => {
+        if(error){
+            console.log(error);
+        } else {
+            console.log("Email sent: " + info.response);
+        }
+    })
 }
 
 /*
