@@ -65,7 +65,12 @@ const credentials = {
     private_key: config.GOOGLE_PRIVATE_KEY,
 };
 
-const sessionClient = new dialogflow.SessionsClient();
+const sessionClient = new dialogflow.SessionsClient(
+    {
+        projectId: config.GOOGLE_PROJECT_ID,
+        credentials
+    }
+);
 
 const sessionIds = new Map();
 
