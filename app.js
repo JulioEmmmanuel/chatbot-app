@@ -65,12 +65,7 @@ const credentials = {
     private_key: config.GOOGLE_PRIVATE_KEY,
 };
 
-const sessionClient = new dialogflow.SessionsClient(
-    {
-        projectId: config.GOOGLE_PROJECT_ID,
-        credentials
-    }
-);
+const sessionClient = new dialogflow.SessionsClient();
 
 const sessionIds = new Map();
 
@@ -362,6 +357,8 @@ async function sendToDialogFlow(sender, textString, params) {
             sessionIds.get(sender)
         );
 
+        console.log(sessionPath)
+
         const request = {
             session: sessionPath,
             queryInput: {
@@ -376,7 +373,12 @@ async function sendToDialogFlow(sender, textString, params) {
                 }
             }
         };
+
+        console.log(request)
+
         const responses = await sessionClient.detectIntent(request);
+
+        console.log(responses)
 
         const result = responses[0].queryResult;
         handleDialogFlowResponse(sender, result);
