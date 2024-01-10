@@ -213,19 +213,41 @@ function handleDialogFlowAction(sender, action, messages, contexts, parameters) 
                 let yearsOfExperience = contexts[0].parameters.fields["years-of-experience"]?.stringValue || "";
                 let jobVacancy = contexts[0].parameters.fields["job-vacancy"]?.stringValue || "";
 
-                if(phoneNumber && userName && previousJob && yearsOfExperience && jobVacancy){
+                if(!phoneNumber && !yearsOfExperience && previousJob && userName){
+                    let replies = [
+                        {
+                            "content_type": "text",
+                            "title": "Less than 1 year",
+                            "payload": "Less than 1 year"
+                        },
+                        {
+                            "content_type": "text",
+                            "title": "Less than 10 years",
+                            "payload": "Less than 10 years"
+                        },
+                        {
+                            "content_type": "text",
+                            "title": "More than 10 years",
+                            "payload": "More than 10 years"
+                        }
+                    ]
+                    sendQuickReply(sender, messages[0].text.text[0], replies);
+                } else if(phoneNumber && userName && previousJob && yearsOfExperience && jobVacancy){
                     let emailContent = "A new job enquiry from " + userName + " for the job: " + jobVacancy +
                     "<br> Previous job position: " + previousJob + "." +
                     "<br> Years of experience: " + yearsOfExperience + "." +
                     "<br> Phone number: " + phoneNumber + ".";
 
-                    console.log(emailContent)
-
                     sendEmail("New job application", emailContent);
-                }   
+                    handleMessages(messages, sender);
+                }  else {
+                    handleMessages(messages, sender);
+
+                }
+            } else {
+                handleMessage(messages, sender);
             }
 
-            handleMessages(messages, sender);
             break;
         case "faq-delivery":
             handleMessages(messages, sender);
@@ -783,7 +805,7 @@ function receivedPostback(event) {
             greetUserText(senderID);
             break;
         case "JOB_APPLY":
-            sendToDialogFlow(senderId, "job openings");
+            sendToDialogFlow(senderID, "job openings");
             break;
         case "CHAT":
             sendTextMessage(senderID, "I love chatting too. Do you have any other questions for me?");
