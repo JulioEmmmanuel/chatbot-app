@@ -11,5 +11,6 @@ module.exports = {
     GOOGLE_PRIVATE_KEY: process.env.GOOGLE_PRIVATE_KEY.split(String.raw`\n`).join('\n'),
     EMAIL_FROM: process.env.EMAIL_FROM,
     EMAIL_TO: process.env.EMAIL_TO,
-    EMAIL_PASS: process.env.EMAIL_PASS
+    EMAIL_PASS: process.env.EMAIL_PASS,
+    WEATHER_API_KEY: process.env.WEATHER_API_KEY
 };

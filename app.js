@@ -273,6 +273,33 @@ function handleDialogFlowAction(sender, action, messages, contexts, parameters) 
                 sendButtonMessage(sender, "What would you like to do next?", buttons);
             }, 3000)
             break;
+        case "get-current-weather":
+            if(parameters.fields["geo-city"]){
+                const url = "http://api.weatherapi.com/v1/current.json";
+                axios.get(url, {
+                    params: {
+                      q: parameters.fields['geo-city'],
+                      key: config.WEATHER_API_KEY
+                    }
+                  })
+                  .then(response => {
+                    if(response.status === 200){
+                        let weather = response.data;
+                        if(weather.current){
+                            let reply = `${messages[0].text.text} ${weather.current.condition.text}`
+                            sendTextMessage(sender, reply);
+                        } else {
+                            sendTextMessage(sender, `No weather forecast available for ${parameters.fields["geo-city"]}`);
+                        }
+                    } else {
+                        sendTextMessage(sender, "Weather forecast is not available");
+                    }
+                })
+                .catch(err => console.error("Failed calling Send API", err.message));
+            } else {
+                handleMessage(messages, sender);
+            }
+            break;
         default:
             //unhandled action, just send back the text
             handleMessages(messages, sender);
