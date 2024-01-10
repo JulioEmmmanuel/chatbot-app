@@ -225,12 +225,33 @@ function handleDialogFlowAction(sender, action, messages, contexts, parameters) 
                 }   
             }
 
-            console.log("1", action);
             handleMessages(messages, sender);
             break;
+        case "faq-delivery":
+            handleMessages(messages, sender);
+            sendTypingOn(sender);
+            setTimeout(() => {
+                let buttons = [
+                    {
+                        type: "web_url",
+                        title: "Track my order",
+                        url: "https://www.myapple.com/track-order",
+                    }, 
+                    {
+                        type: "phone_number",
+                        title: "Call us",
+                        payload: "+524445740360"
+                    },
+                    {
+                        type: "postback",
+                        title: "Keep on chatting",
+                        payload: "CHAT"
+                    }
+                ]
+                sendButtonMessage(sender, "What would you like to do next?", buttons);
+            }, 3000)
         default:
             //unhandled action, just send back the text
-            console.log("2", action);
             handleMessages(messages, sender);
     }
 }
@@ -757,6 +778,9 @@ function receivedPostback(event) {
     var payload = event.postback.payload;
 
     switch (payload) {
+        case "CHAT":
+            sendTextMessage(senderID, "I love chatting too. Do you have any other questions for me?");
+            break;
         default:
             //unindentified payload
             sendTextMessage(senderID, "I'm not sure what you want. Can you be more specific?");
