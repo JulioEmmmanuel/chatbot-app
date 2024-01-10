@@ -276,8 +276,6 @@ function handleDialogFlowAction(sender, action, messages, contexts, parameters) 
         case "get-current-weather":
             if(parameters.fields["geo-city"] && parameters.fields["geo-city"].stringValue){
                 const url = "http://api.weatherapi.com/v1/current.json";
-                console.log(parameters.fields["geo-city"]);
-                console.log(config.WEATHER_API_KEY);
                 axios.get(url, {
                     params: {
                       q: parameters.fields['geo-city'].stringValue,
@@ -300,7 +298,7 @@ function handleDialogFlowAction(sender, action, messages, contexts, parameters) 
                 })
                 .catch(err => console.error("Failed calling Weather API", err.message));
             } else {
-                handleMessage(messages, sender);
+                handleMessages(messages, sender);
             }
             break;
         default:
