@@ -802,7 +802,9 @@ function receivedPostback(event) {
 
 function greetUserText(userId){
     axios.get("https://graph.facebook.com/v3.2/" + userId, {
-        "access_token": config.FB_PAGE_TOKEN
+        params: {
+            "access_token": config.FB_PAGE_TOKEN
+        }
     })
     .then(response => {
         if(response.status === 200){
