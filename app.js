@@ -274,13 +274,13 @@ function handleDialogFlowAction(sender, action, messages, contexts, parameters) 
             }, 3000)
             break;
         case "get-current-weather":
-            if(parameters.fields["geo-city"]){
+            if(parameters.fields["geo-city"] && parameters.fields["geo-city"].stringValue){
                 const url = "http://api.weatherapi.com/v1/current.json";
                 console.log(parameters.fields["geo-city"]);
                 console.log(config.WEATHER_API_KEY);
                 axios.get(url, {
                     params: {
-                      q: parameters.fields['geo-city'],
+                      q: parameters.fields['geo-city'].stringValue,
                       key: config.WEATHER_API_KEY
                     }
                   })
