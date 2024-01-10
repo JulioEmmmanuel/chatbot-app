@@ -250,6 +250,7 @@ function handleDialogFlowAction(sender, action, messages, contexts, parameters) 
                 ]
                 sendButtonMessage(sender, "What would you like to do next?", buttons);
             }, 3000)
+            break;
         default:
             //unhandled action, just send back the text
             handleMessages(messages, sender);
@@ -778,6 +779,12 @@ function receivedPostback(event) {
     var payload = event.postback.payload;
 
     switch (payload) {
+        case "GET_STARTED":
+            greetUserText(senderID);
+            break;
+        case "JOB_APPLY":
+            sendToDialogFlow(senderId, "job openings");
+            break;
         case "CHAT":
             sendTextMessage(senderID, "I love chatting too. Do you have any other questions for me?");
             break;
@@ -791,6 +798,26 @@ function receivedPostback(event) {
     console.log("Received postback for user %d and page %d with payload '%s' " +
         "at %d", senderID, recipientID, payload, timeOfPostback);
 
+}
+
+function greetUserText(userId){
+    axios.get("https://graph.facebook.com/v3.2/" + userId, {
+        "access_token": config.FB_PAGE_TOKEN
+    })
+    .then(response => {
+        if(response.status === 200){
+            console.log("userData: ", response.data);
+            const user = response.data;
+            if(user["first_name"]){
+                console.log(`FB user ${user["first_name"]}  ${user["last_name"]} ${user["profile_pic"]}`)
+            }
+            sendTextMessage(userId, "Welcome " + user.first_name + "!" +
+            "I can answer frequently asked questions for you and I perform job interviews. What can I help you with?");
+        } else {
+            console.log("Cannot get data for fb user with id", userId);
+        }
+    })
+    .catch(err => console.error("Failed calling Send API", err.message));
 }
 
 
